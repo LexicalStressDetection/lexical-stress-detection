@@ -1,0 +1,13 @@
+# Normalize line endings so that git won't change line endings when developing on different platforms
+*py text eol=lf
+*md text eol=lf
+*html text eol=lf
+*css text eol=lf
+*js text eol=lf
+*json text eol=lf
+*yml text eol=lf
+*txt text eol=lf
+*csv text eol=lf
+.git* text eol=lf
+.editor* text eol=lf
+MANIFEST* text eol=lf
