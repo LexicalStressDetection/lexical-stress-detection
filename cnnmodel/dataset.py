@@ -12,17 +12,17 @@ class CNNDataset(Dataset):
     @staticmethod
     def _npy_loader(path):
         mfcc = np.load(path)
-        f1_f7_file_path = path.replace('mfcc', 'f1_f7')
-        f1_f7 = np.load(f1_f7_file_path)
+        non_mfcc_file_path = path.replace('mfcc', 'other')
+        non_mfcc = np.load(non_mfcc_file_path)
 
         # in_channels x height x width
         assert mfcc.shape == (3, 1, 27)
-        assert f1_f7.shape == (21, )
+        assert non_mfcc.shape == (18, )
 
         mfcc = torch.from_numpy(mfcc).float()
-        f1_f7 = torch.from_numpy(f1_f7).float()
+        non_mfcc = torch.from_numpy(non_mfcc).float()
 
-        return mfcc, f1_f7
+        return mfcc, non_mfcc
 
     def __getitem__(self, index):
         return self.dataset_folder[index]
