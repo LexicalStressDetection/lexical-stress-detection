@@ -4,6 +4,7 @@ import scipy.io.wavfile as sciwav
 
 from util import LRU
 from . import mfcc_extraction
+import wave
 from . import non_mfcc_extraction
 
 
@@ -29,6 +30,7 @@ class SampleExtraction:
 
         phoneme = vowel_phonemes[index]
         samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
+        audio_file = wave.open(self.wav_root + '/' + phoneme.path, "r")
 
         if phoneme not in self.features_cache:
             # extract MFCC features, should be a matrix of shape (1, 1, 27)
@@ -36,9 +38,7 @@ class SampleExtraction:
             mfcc_features = mfcc_features.reshape(shape=(1, 1, 27))
 
             # extract non MFCC features, should be a vector of shape (6,)
-            # TODO
-            non_mfcc_features = None
-            # end TODO
+            non_mfcc_features = non_mfcc_extraction.get_non_mfcc(signal, audio_file, samplerate)
 
             self.features_cache[phoneme] = (mfcc_features, non_mfcc_features)
 

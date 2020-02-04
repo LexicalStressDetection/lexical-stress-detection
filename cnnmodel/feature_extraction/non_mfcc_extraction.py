@@ -1,7 +1,10 @@
 import numpy
+from . import mfcc_extraction
 
 EPS = 1e-8  # 0.00000001
-
+samplerate=16000
+win_length=0.025
+win_step=0.01
 
 def get_p2pamplitude(signal):
     """
@@ -127,3 +130,28 @@ def get_pitch_values(frames, fs):
     for i in range(len(frames)):
         pitch_for_frames.append(pitch_from_zcr(frames[i], fs))
     return pitch_for_frames
+
+
+def get_non_mfcc(signal, audio_file, samplerate):
+    """
+    Compute the non-MFCC features of the signal, these include:
+    f1 : Compute the peak-to-peak amplitude of the signal
+    f2 : Mean energy over syllable nucleus
+    f3 : Max energy over syllable nucleus
+    f4 : Duration of a vowel nucleus
+    f5 : Maximum pitch over syllable nucleus
+    f6 : Mean pitch over syllable nucleus
+    """
+
+    non_mfcc_features = numpy.zeros(6)
+    frames = mfcc_extraction.audio2frame(signal, win_length * samplerate, win_step * samplerate)
+    energy = get_energy_for_frames(frames)
+    pitch_vals = get_pitch_values(frames, samplerate)
+    non_mfcc_features[0] = get_p2pamplitude(signal)
+    non_mfcc_features[1] = get_mean_energy_over_syllable_nucleus(energy)
+    non_mfcc_features[2] = get_max_energy_over_syllable_nucleus(energy)
+    non_mfcc_features[3] = get_duration(audio_file)
+    non_mfcc_features[4] = get_max_pitch_over_syllable_nucleus(pitch_vals)
+    non_mfcc_features[5] = get_mean_pitch_over_syllable_nucleus(pitch_vals)
+    return non_mfcc_features
+
