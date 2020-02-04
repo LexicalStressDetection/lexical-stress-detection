@@ -1,6 +1,6 @@
 import numpy
 
-eps = 1e-8  # 0.00000001
+EPS = 1e-8  # 0.00000001
 
 
 def get_p2pamplitude(signal):
@@ -70,7 +70,7 @@ def pitch_from_zcr(frame, fs):
     m0 = int(m0)
     Gamma = numpy.zeros(M)
     CSum = numpy.cumsum(frame ** 2)
-    Gamma[m0:M] = R[m0:M] / (numpy.sqrt((g * CSum[M:m0:-1])) + eps)
+    Gamma[m0:M] = R[m0:M] / (numpy.sqrt((g * CSum[M:m0:-1])) + EPS)
     ZCR = zcr(Gamma)
     if ZCR[1] > 0.15:
         HR = 0.0
@@ -84,7 +84,7 @@ def pitch_from_zcr(frame, fs):
             HR = numpy.max(Gamma)
             blag = numpy.argmax(Gamma)
         # Get fundamental frequency:
-        f0 = fs / (blag + eps)
+        f0 = fs / (blag + EPS)
         if f0 > 5000:
             f0 = 0.0
         if HR < 0.1:

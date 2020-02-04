@@ -78,9 +78,9 @@ def fbank(signal, samplerate=16000, win_length=0.025, win_step=0.01,
     return feat, energy
 
 
-def calcMFCC(signal, samplerate=16000, win_length=0.025, win_step=0.01,
-             cep_num=13, filters_num=26, NFFT=512, low_freq=0, high_freq=None,
-             pre_emphasis_coeff=0.97, cep_lifter=22, appendEnergy=True):
+def calc_MFCC(signal, samplerate=16000, win_length=0.025, win_step=0.01,
+              cep_num=13, filters_num=26, NFFT=512, low_freq=0, high_freq=None,
+              pre_emphasis_coeff=0.97, cep_lifter=22, appendEnergy=True):
     """
     Compute MFCC features from an audio signal.
     :param signal: the audio signal from which to compute features. Should be an N*1 array
@@ -164,8 +164,8 @@ def lifter(cepstra, L=22):
         return cepstra
 
 
-def get_mfcc(signal, fs, cep_num=27):
+def get_mfcc(signal, samplerate, cep_num=27):
     """
     27 Mel-scale energy bands over syllable nucleus
     """
-    return calcMFCC(signal, fs, cep_num)
+    return calc_MFCC(signal, samplerate, cep_num)
