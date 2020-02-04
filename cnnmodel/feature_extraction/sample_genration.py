@@ -8,7 +8,6 @@ from . import non_mfcc_extraction
 
 
 class Phoneme:
-
     def __init__(self, path, id_, word, phoneme):
         self.path = path
         self.id_ = id_
@@ -31,7 +30,7 @@ class SampleExtraction:
         phoneme = vowel_phonemes[index]
         samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
 
-        if index not in self.features_cache:
+        if phoneme not in self.features_cache:
             # extract MFCC features, should be a matrix of shape (1, 1, 27)
             mfcc_features = mfcc_extraction.get_mfcc(signal, samplerate, cep_num=27)
             mfcc_features = mfcc_features.reshape(shape=(1, 1, 27))
@@ -41,7 +40,7 @@ class SampleExtraction:
             non_mfcc_features = None
             # end TODO
 
-            self.features_cache[index] = (mfcc_features, non_mfcc_features)
+            self.features_cache[phoneme] = (mfcc_features, non_mfcc_features)
 
         return self.features_cache[index]
 
