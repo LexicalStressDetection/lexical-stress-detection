@@ -39,7 +39,7 @@ class SampleExtraction:
     def get_phoneme_features(self, index, n, vowel_phonemes):
         # if out of bound then
         if index < 0 or index >= n:
-            return np.zeros(shape=(1, 1, 27), dtype=np.float64)
+            return np.zeros(shape=(1, 10, 27), dtype=np.float64), np.zeros(18, dtype=np.float64)
 
         phoneme = vowel_phonemes[index]
 
