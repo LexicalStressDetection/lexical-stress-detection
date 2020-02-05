@@ -1,4 +1,3 @@
-import shutil
 import uuid
 import sys
 import os
@@ -30,11 +29,10 @@ class SampleExtraction:
         self.make_directories()
 
     def make_directories(self):
-        shutil.rmtree(self.out_dir + '/data', ignore_errors=True)
-        os.makedirs(self.out_dir + '/data/0', exist_ok=True)
-        os.makedirs(self.out_dir + '/data/1', exist_ok=True)
-        os.makedirs(self.out_dir + '/data/2', exist_ok=True)
-        print('Created directories for each label in path: {}'.format(self.out_dir + '/data'))
+        os.makedirs(self.out_dir + '/0', exist_ok=True)
+        os.makedirs(self.out_dir + '/1', exist_ok=True)
+        os.makedirs(self.out_dir + '/2', exist_ok=True)
+        print('Created directories for each label in path: {}'.format(self.out_dir))
 
     def get_phoneme_features(self, index, n, vowel_phonemes):
         # if out of bound then
