@@ -6,8 +6,8 @@ import numpy as np
 import scipy.io.wavfile as sciwav
 
 from util import LRU
-from . import mfcc_extraction
-from . import non_mfcc_extraction
+from cnnmodel.feature_extraction import mfcc_extraction
+from cnnmodel.feature_extraction import non_mfcc_extraction
 
 
 class Phoneme:

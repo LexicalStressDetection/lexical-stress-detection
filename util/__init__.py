@@ -1,2 +1,2 @@
-from . import cache
+from util import cache
 LRU = cache.LRU
