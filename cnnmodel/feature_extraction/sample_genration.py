@@ -1,3 +1,4 @@
+import shutil
 import uuid
 import sys
 import os
@@ -27,9 +28,11 @@ class SampleExtraction:
         self.make_directories()
 
     def make_directories(self):
+        shutil.rmtree(self.out_dir + '/data', ignore_errors=True)
         os.makedirs(self.out_dir + '/data/0', exist_ok=True)
         os.makedirs(self.out_dir + '/data/1', exist_ok=True)
         os.makedirs(self.out_dir + '/data/2', exist_ok=True)
+        print('Created directories for each label in path: {}'.format(self.out_dir + '/data'))
 
     def get_phoneme_features(self, index, n, vowel_phonemes):
         # if out of bound then
@@ -66,6 +69,9 @@ class SampleExtraction:
             file_name = uuid.uuid4().hex
             np.save(self.out_dir + '/' + label + '/' + file_name + '_mfcc.npy', mfcc_tensor)
             np.save(self.out_dir + '/' + label + '/' + file_name + '_other.npy', non_mfcc_vector)
+
+        print('finished writing {} samples for id: {}, word: {}'.
+              format(n, vowel_phonemes[0].id_, vowel_phonemes[0].word))
 
     def extract_features(self):
         phoneme_alignment_file = open(self.alignment_file, 'r')
