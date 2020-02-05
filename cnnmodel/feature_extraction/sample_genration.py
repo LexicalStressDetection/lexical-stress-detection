@@ -52,7 +52,7 @@ class SampleExtraction:
 
             self.features_cache[phoneme] = (mfcc_features, non_mfcc_features)
 
-        return self.features_cache[index]
+        return self.features_cache[phoneme]
 
     def generate_samples(self, vowel_phonemes):
         n = len(vowel_phonemes)
