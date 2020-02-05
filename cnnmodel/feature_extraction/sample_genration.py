@@ -1,10 +1,11 @@
 import uuid
+import sys
+import os
 import numpy as np
 import scipy.io.wavfile as sciwav
 
 from util import LRU
 from . import mfcc_extraction
-import wave
 from . import non_mfcc_extraction
 
 
@@ -23,6 +24,13 @@ class SampleExtraction:
         self.out_dir = out_dir
         self.features_cache = LRU(maxsize=5)
 
+        self.make_directories()
+
+    def make_directories(self):
+        os.makedirs(self.out_dir + '/data/0', exist_ok=True)
+        os.makedirs(self.out_dir + '/data/1', exist_ok=True)
+        os.makedirs(self.out_dir + '/data/2', exist_ok=True)
+
     def get_phoneme_features(self, index, n, vowel_phonemes):
         # if out of bound then
         if index < 0 or index >= n:
@@ -30,7 +38,6 @@ class SampleExtraction:
 
         phoneme = vowel_phonemes[index]
         samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
-        audio_file = wave.open(self.wav_root + '/' + phoneme.path, "r")
 
         if phoneme not in self.features_cache:
             # extract MFCC features, should be a matrix of shape (1, 1, 27)
@@ -38,7 +45,7 @@ class SampleExtraction:
             mfcc_features = mfcc_features.reshape(shape=(1, 1, 27))
 
             # extract non MFCC features, should be a vector of shape (6,)
-            non_mfcc_features = non_mfcc_extraction.get_non_mfcc(signal, audio_file, samplerate)
+            non_mfcc_features = non_mfcc_extraction.get_non_mfcc(signal, samplerate)
 
             self.features_cache[phoneme] = (mfcc_features, non_mfcc_features)
 
@@ -89,9 +96,14 @@ class SampleExtraction:
         phoneme_alignment_file.close()
 
 
-def main():
-    pass
+def main(wav_root, alignment_file, out_dir):
+    sample_extraction = SampleExtraction(wav_root, alignment_file, out_dir)
+    sample_extraction.extract_features()
 
 
 if __name__ == '__main__':
-    main()
+    # script needs three command line arguments
+    # 1. root path of the folder with wav files split into phonemes
+    # 2. tab separated file with phoneme info
+    # 3. output path where npy files will be generated
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
