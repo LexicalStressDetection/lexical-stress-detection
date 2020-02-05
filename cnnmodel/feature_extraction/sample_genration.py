@@ -9,6 +9,8 @@ from util import LRU
 from cnnmodel.feature_extraction import mfcc_extraction
 from cnnmodel.feature_extraction import non_mfcc_extraction
 
+OPTIMAL_DURATION = 0.115  # we use a frame width of .025 s with stride of .010 s. duration = 0.115 will have 10 frames
+
 
 class Phoneme:
     def __init__(self, path, id_, word, phoneme):
@@ -40,12 +42,26 @@ class SampleExtraction:
             return np.zeros(shape=(1, 1, 27), dtype=np.float64)
 
         phoneme = vowel_phonemes[index]
-        samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
 
         if phoneme not in self.features_cache:
-            # extract MFCC features, should be a matrix of shape (1, 1, 27)
+            samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
+            optimal_signal_len = int(samplerate * OPTIMAL_DURATION)
+
+            signal_len = len(signal)
+            excess = signal_len - optimal_signal_len
+            left_pad = abs(excess // 2)
+            right_pad = abs(excess) - left_pad
+
+            if signal_len > optimal_signal_len:
+                signal = signal[left_pad:-right_pad]
+
+            elif signal_len < optimal_signal_len:
+                signal = np.concatenate([np.zeros(left_pad), signal, np.zeros(right_pad)], axis=0)
+
+            # extract MFCC features, should be a matrix of shape (1, 10, 27)
             mfcc_features = mfcc_extraction.get_mfcc(signal, samplerate, cep_num=27)
-            mfcc_features = mfcc_features.reshape(shape=(1, 1, 27))
+            # returned np array is of shape (10, 27), add a new channel axis
+            mfcc_features = mfcc_features[np.newaxis, :, :]
 
             # extract non MFCC features, should be a vector of shape (6,)
             non_mfcc_features = non_mfcc_extraction.get_non_mfcc(signal, samplerate)

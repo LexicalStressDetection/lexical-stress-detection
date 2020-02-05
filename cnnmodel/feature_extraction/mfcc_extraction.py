@@ -102,7 +102,8 @@ def calc_MFCC(signal, samplerate=16000, win_length=0.025, win_step=0.01,
     feat = numpy.log(feat)
     feat = dct(feat, type=2, axis=1, norm='ortho')[:, :cep_num]
     feat = lifter(feat, cep_lifter)
-    if appendEnergy: feat[:, 0] = numpy.log(energy)
+    if appendEnergy:
+        feat[:, 0] = numpy.log(energy)
     return feat
 
 
@@ -168,4 +169,4 @@ def get_mfcc(signal, samplerate, cep_num=27):
     """
     27 Mel-scale energy bands over syllable nucleus
     """
-    return calc_MFCC(signal, samplerate, cep_num)
+    return calc_MFCC(signal, samplerate=samplerate, cep_num=cep_num, filters_num=cep_num)
