@@ -1,5 +1,5 @@
 import numpy
-import mfcc_extraction
+from . import mfcc_extraction
 
 EPS = 1e-8  # 0.00000001
 win_length = 0.025

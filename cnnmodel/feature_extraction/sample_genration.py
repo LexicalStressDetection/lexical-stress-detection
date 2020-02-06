@@ -75,7 +75,7 @@ class SampleExtraction:
         for i in range(n):
             phoneme = vowel_phonemes[i]
             label = phoneme.phoneme[-1]
-            
+
             pre_mfcc, pre_non_mfcc = self.get_phoneme_features(i - 1, n, vowel_phonemes, features_cache)
             anchor_mfcc, anchor_non_mfcc = self.get_phoneme_features(i, n, vowel_phonemes, features_cache)
             suc_mfcc, suc_non_mfcc = self.get_phoneme_features(i + 1, n, vowel_phonemes, features_cache)
@@ -91,8 +91,8 @@ class SampleExtraction:
 
     def get_features_for_words(self, word_list):
         pool = mp.Pool(mp.cpu_count())
-        for i in range(len(word_list)):
-            pool.apply(self.generate_samples, args=[word_list[i]])
+        for word in word_list:
+            pool.apply(self.generate_samples, args=[word])
 
     def extract_features(self):
         phoneme_alignment_file = open(self.alignment_file, 'r')
