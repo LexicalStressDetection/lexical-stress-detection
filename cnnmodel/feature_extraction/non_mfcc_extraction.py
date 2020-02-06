@@ -1,4 +1,6 @@
 import numpy
+import mfcc_extraction
+
 
 eps = 1e-8  # 0.00000001
 
