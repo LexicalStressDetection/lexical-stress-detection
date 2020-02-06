@@ -5,6 +5,7 @@ import numpy as np
 import scipy.io.wavfile as sciwav
 import multiprocessing as mp
 
+
 from util import LRU
 from cnnmodel.feature_extraction import mfcc_extraction
 from cnnmodel.feature_extraction import non_mfcc_extraction
@@ -74,7 +75,7 @@ class SampleExtraction:
         for i in range(n):
             phoneme = vowel_phonemes[i]
             label = phoneme.phoneme[-1]
-
+            
             pre_mfcc, pre_non_mfcc = self.get_phoneme_features(i - 1, n, vowel_phonemes, features_cache)
             anchor_mfcc, anchor_non_mfcc = self.get_phoneme_features(i, n, vowel_phonemes, features_cache)
             suc_mfcc, suc_non_mfcc = self.get_phoneme_features(i + 1, n, vowel_phonemes, features_cache)
