@@ -1,3 +1,4 @@
+import sys
 import time
 
 import numpy as np
@@ -14,10 +15,10 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
     model.train()
     losses = []
     accuracy = 0
-    for batch_idx, ((mfcc, f1_f7), label) in enumerate(tqdm.tqdm(train_loader)):
-        mfcc, f1_f7, label = mfcc.to(device), f1_f7.to(device), label.to(device)
+    for batch_idx, ((mfcc, non_mfcc), label) in enumerate(tqdm.tqdm(train_loader)):
+        mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
         optimizer.zero_grad()
-        out = model(mfcc, f1_f7)
+        out = model(mfcc, non_mfcc)
         loss = model.loss(out, label)
 
         with torch.no_grad():
@@ -45,9 +46,9 @@ def test(model, device, test_loader, log_interval=None):
 
     accuracy = 0
     with torch.no_grad():
-        for batch_idx, ((mfcc, f1_f7), label) in enumerate(tqdm.tqdm(test_loader)):
-            mfcc, f1_f7, label = mfcc.to(device), f1_f7.to(device), label.to(device)
-            out = model(mfcc, f1_f7)
+        for batch_idx, ((mfcc, non_mfcc), label) in enumerate(tqdm.tqdm(test_loader)):
+            mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
+            out = model(mfcc, non_mfcc)
             test_loss_on = model.loss(out, label).item()
             test_loss += test_loss_on
 
@@ -68,7 +69,7 @@ def test(model, device, test_loader, log_interval=None):
     return test_loss, accuracy_mean
 
 
-def main():
+def main(train_path, test_path):
     use_cuda = True
     device = torch.device("cuda" if use_cuda else "cpu")
     print('using device', device)
@@ -79,13 +80,14 @@ def main():
     kwargs = {'num_workers': multiprocessing.cpu_count(),
               'pin_memory': True} if use_cuda else {}
 
-    train_dataset = CNNDataset(root='C:/Users/vivek/dev/capstone/ml-stress-detection-nn/train')
+    train_dataset = CNNDataset(root=train_path)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
 
-    test_dataset = CNNDataset(root='C:/Users/vivek/dev/capstone/ml-stress-detection-nn/test')
+    test_dataset = CNNDataset(root=test_path)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True, **kwargs)
 
     model = CNNStressNet(reduction='mean').to(device)
+    print(model)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     for epoch in range(0, 5):
@@ -96,4 +98,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # needs two command line arguments
+    # 1. root path of train data
+    # 2. root path of test data
+    main(sys.argv[1], sys.argv[2])

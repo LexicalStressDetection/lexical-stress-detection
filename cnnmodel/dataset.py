@@ -16,7 +16,7 @@ class CNNDataset(Dataset):
         non_mfcc = np.load(non_mfcc_file_path)
 
         # in_channels x height x width
-        assert mfcc.shape == (3, 1, 27)
+        assert mfcc.shape == (3, 10, 27)
         assert non_mfcc.shape == (18, )
 
         mfcc = torch.from_numpy(mfcc).float()
