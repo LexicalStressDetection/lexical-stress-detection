@@ -27,6 +27,7 @@ class SampleExtraction:
         self.alignment_file = alignment_file
         self.out_dir = out_dir
 
+        self.pool = mp.Pool(mp.cpu_count())
         self.make_directories()
 
     def make_directories(self):
@@ -89,16 +90,10 @@ class SampleExtraction:
         print('finished writing {} samples for id: {}, word: {}'.
               format(n, vowel_phonemes[0].id_, vowel_phonemes[0].word))
 
-    def get_features_for_words(self, word_list):
-        pool = mp.Pool(mp.cpu_count())
-        for word in word_list:
-            pool.apply(self.generate_samples, args=[word])
-
     def extract_features(self):
         phoneme_alignment_file = open(self.alignment_file, 'r')
         current_word = None
         curr_vowels = []
-        word_list = []
         for line in phoneme_alignment_file:
             path, id_, word, phoneme = line.split()
             phoneme = Phoneme(path, id_, word, phoneme)
@@ -113,7 +108,7 @@ class SampleExtraction:
 
             elif current_word != (id_, word):
                 # new word encountered. create training samples from the old list
-                word_list.append(curr_vowels)
+                self.pool.apply(self.generate_samples, args=[curr_vowels])
 
                 # overwrite the curr_word and curr_vowels
                 current_word = (id_, word)
@@ -121,9 +116,8 @@ class SampleExtraction:
                 if phoneme.phoneme[-1].isnumeric():
                     curr_vowels.append(phoneme)
 
-        word_list.append(curr_vowels)
+        self.pool.apply(self.generate_samples, args=[curr_vowels])
         phoneme_alignment_file.close()
-        self.get_features_for_words(word_list)
 
 
 def main(wav_root, alignment_file, out_dir):
