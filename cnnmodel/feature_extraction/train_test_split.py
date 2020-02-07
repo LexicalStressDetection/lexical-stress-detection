@@ -64,6 +64,14 @@ class TrainTestSplit:
 
                 print('submitted all for label: {}'.format(label))
 
+    def __getstate__(self):
+        self_dict = self.__dict__.copy()
+        del self_dict['pool']
+        return self_dict
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
 
 def main(data_path, train_path, test_path, test_size):
     train_test_split = TrainTestSplit(data_path=data_path, train_path=train_path,

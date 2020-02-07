@@ -119,6 +119,14 @@ class SampleExtraction:
         self.pool.apply(self.generate_samples, args=[curr_vowels])
         phoneme_alignment_file.close()
 
+    def __getstate__(self):
+        self_dict = self.__dict__.copy()
+        del self_dict['pool']
+        return self_dict
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
 
 def main(wav_root, alignment_file, out_dir):
     sample_extraction = SampleExtraction(wav_root, alignment_file, out_dir)
