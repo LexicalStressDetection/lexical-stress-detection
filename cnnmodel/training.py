@@ -1,14 +1,17 @@
 import sys
 import time
+import tqdm
 
 import numpy as np
 import torch
-import tqdm
+
 from torch import optim
 from torch.utils.data import DataLoader
 
 from cnnmodel.model import CNNStressNet
 from cnnmodel.dataset import CNNDataset
+
+from util.pt_util import restore_objects, save_model, save_objects, restore_model
 
 
 def train(model, device, train_loader, optimizer, epoch, log_interval):
@@ -42,7 +45,7 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
 
 def test(model, device, test_loader, log_interval=None):
     model.eval()
-    test_loss = 0
+    losses = []
 
     accuracy = 0
     with torch.no_grad():
@@ -50,7 +53,7 @@ def test(model, device, test_loader, log_interval=None):
             mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
             out = model(mfcc, non_mfcc)
             test_loss_on = model.loss(out, label).item()
-            test_loss += test_loss_on
+            losses.append(test_loss_on)
 
             pred = torch.argmax(out, dim=1)
             accuracy += torch.sum((pred == label))
@@ -61,7 +64,7 @@ def test(model, device, test_loader, log_interval=None):
                     batch_idx * len(mfcc), len(test_loader.dataset),
                     100. * batch_idx / len(test_loader), test_loss_on))
 
-    test_loss /= len(test_loader.dataset)
+    test_loss = np.mean(losses)
     accuracy_mean = (100. * accuracy) / len(test_loader.dataset)
 
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} , ({:.4f})%\n'.format(
@@ -69,7 +72,11 @@ def test(model, device, test_loader, log_interval=None):
     return test_loss, accuracy_mean
 
 
-def main(train_path, test_path):
+def main(train_path, test_path, model_path):
+    print('train path: {}'.format(train_path))
+    print('test path: {}'.format(test_path))
+    print('model path: {}'.format(model_path))
+
     use_cuda = True
     device = torch.device("cuda" if use_cuda else "cpu")
     print('using device', device)
@@ -87,18 +94,35 @@ def main(train_path, test_path):
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True, **kwargs)
 
     model = CNNStressNet(reduction='mean').to(device)
-    print(model)
+    model = restore_model(model, model_path)
+    last_epoch, max_accuracy, train_losses, test_losses, train_accuracies, test_accuracies = \
+        restore_objects(model_path, (0, 0, [], [], [], []))
+
+    start = last_epoch + 1 if max_accuracy > 0 else 0
+
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
-    for epoch in range(0, 5):
+    for epoch in range(start, 5):
         train_loss, train_accuracy = train(model, device, train_loader, optimizer, epoch, 100)
         test_loss, test_accuracy = test(model, device, test_loader)
         print('After epoch: {}, train_loss: {}, test loss is: {}, train_accuracy: {}, '
               'test_accuracy: {}'.format(epoch, train_loss, test_loss, train_accuracy, test_accuracy))
+
+        train_losses.append(train_loss)
+        test_losses.append(test_loss)
+        train_accuracies.append(train_accuracy)
+        test_accuracies.append(test_accuracy)
+        if test_accuracy > max_accuracy:
+            max_accuracy = test_accuracy
+            save_model(model, epoch, model_path)
+            save_objects((epoch, max_accuracy, train_losses, test_losses, train_accuracies, test_accuracies),
+                         epoch, model_path)
+            print('saved epoch: {} as checkpoint'.format(epoch))
 
 
 if __name__ == '__main__':
     # needs two command line arguments
     # 1. root path of train data
     # 2. root path of test data
-    main(sys.argv[1], sys.argv[2])
+    # 3. path where saved models are saved
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
