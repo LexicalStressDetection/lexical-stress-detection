@@ -108,7 +108,7 @@ class SampleExtraction:
 
             elif current_word != (id_, word):
                 # new word encountered. create training samples from the old list
-                self.pool.apply(self.generate_samples, args=[curr_vowels])
+                self.pool.apply_async(self.generate_samples, args=[curr_vowels])
 
                 # overwrite the curr_word and curr_vowels
                 current_word = (id_, word)
