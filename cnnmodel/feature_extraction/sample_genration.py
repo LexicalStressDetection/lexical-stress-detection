@@ -118,6 +118,8 @@ class SampleExtraction:
 
         self.pool.apply(self.generate_samples, args=[curr_vowels])
         phoneme_alignment_file.close()
+        self.pool.close()
+        self.pool.join()
 
     def __getstate__(self):
         self_dict = self.__dict__.copy()

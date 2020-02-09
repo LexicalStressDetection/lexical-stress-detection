@@ -63,6 +63,8 @@ class TrainTestSplit:
                     self.copy_npy_files(test_sample, self.test_path, label)
 
                 print('submitted all for label: {}'.format(label))
+        self.pool.close()
+        self.pool.join()
 
     def __getstate__(self):
         self_dict = self.__dict__.copy()
