@@ -39,7 +39,7 @@ class SampleExtraction:
     def get_phoneme_features(self, index, n, vowel_phonemes, features_cache):
         # if out of bound then
         if index < 0 or index >= n:
-            return np.zeros(shape=(1, 10, 27), dtype=np.float64), np.zeros(18, dtype=np.float64)
+            return np.zeros(shape=(1, 10, 27), dtype=np.float64), np.zeros(6, dtype=np.float64)
 
         phoneme = vowel_phonemes[index]
 
@@ -83,7 +83,7 @@ class SampleExtraction:
 
             mfcc_tensor = np.concatenate([pre_mfcc, anchor_mfcc, suc_mfcc], axis=0)
             non_mfcc_vector = np.concatenate([pre_non_mfcc, anchor_non_mfcc, suc_non_mfcc], axis=0)
-            file_name = uuid.uuid4().hex
+            file_name = phoneme.id_ + '_' + phoneme.word + '_' + phoneme.phoneme
             np.save(self.out_dir + '/' + label + '/' + file_name + '_mfcc.npy', mfcc_tensor)
             np.save(self.out_dir + '/' + label + '/' + file_name + '_other.npy', non_mfcc_vector)
 
