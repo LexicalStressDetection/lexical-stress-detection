@@ -77,7 +77,7 @@ def main(train_path, test_path, model_path):
     print('test path: {}'.format(test_path))
     print('model path: {}'.format(model_path))
 
-    use_cuda = True
+    use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     print('using device', device)
 
