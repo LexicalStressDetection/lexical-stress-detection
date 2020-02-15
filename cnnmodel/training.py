@@ -121,7 +121,7 @@ def main(train_path, test_path, model_path):
 
 
 if __name__ == '__main__':
-    # needs two command line arguments
+    # needs three command line arguments
     # 1. root path of train data
     # 2. root path of test data
     # 3. path where saved models are saved

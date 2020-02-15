@@ -31,6 +31,7 @@ class CNNStressNet(nn.Module):
         super().__init__()
         self.loss_layer = nn.CrossEntropyLoss(reduction=reduction)
         self.cnn_network = nn.Sequential(
+            nn.BatchNorm2d(num_features=3),
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=(3 - 1)//2, stride=1),
             nn.PReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=(3 - 1)//2, stride=2),
@@ -45,6 +46,7 @@ class CNNStressNet(nn.Module):
         )
 
         self.dnn_network = nn.Sequential(
+            nn.BatchNorm1d(num_features=18),
             nn.Linear(18, 256),
             nn.PReLU(),
             nn.Linear(256, 128),
