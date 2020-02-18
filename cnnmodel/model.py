@@ -42,7 +42,7 @@ class CNNStressNet(nn.Module):
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=(0, (3 - 1) // 2), stride=2),
             nn.BatchNorm2d(num_features=128),
             nn.PReLU(),
-            nn.AvgPool2d(kernel_size=4)
+            nn.AvgPool2d(kernel_size=(1,4))
         )
 
         self.dnn_network = nn.Sequential(
@@ -60,9 +60,9 @@ class CNNStressNet(nn.Module):
         n = mfcc.shape[0]
         cnn_out = self.cnn_network(mfcc)
         cnn_out = cnn_out.reshape(n, 128)
-
+        
         dnn_out = self.dnn_network(non_mfcc)
-
+        
         out = torch.cat([cnn_out, dnn_out], dim=1)
         out = self.linear(out)
 
