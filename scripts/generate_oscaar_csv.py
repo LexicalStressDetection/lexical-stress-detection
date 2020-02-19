@@ -4,6 +4,9 @@ from pathlib import Path
 
 
 def get_regex_bel_bkb(list_item, order):
+    """
+    Returns the regular expression for Basic English Sentences and BKB Sentences - English datasets
+    """
     regex_ = "*"
     if int(list_item) > 9:
         regex_ = regex_ + list_item
@@ -17,6 +20,9 @@ def get_regex_bel_bkb(list_item, order):
 
 
 def get_regex_ieee(order):
+    """
+    Returns the regular expression for IEEE English 2009 dataset
+    """
     regex_ = "*"
     if int(order) < 10:
         regex_ = regex_ + '00' + order
@@ -28,6 +34,9 @@ def get_regex_ieee(order):
 
 
 def get_regex_clear_speech(num, order):
+    """
+    Returns the regular expression for Clear Speech 2002 dataset
+    """
     regex_ = "*"
     if num == '10':
         regex_ = regex_ + 'X'
@@ -84,17 +93,3 @@ if __name__ == '__main__':
     # 1. root path of Oscaar
     # 2. output csv path
     main(sys.argv[1], sys.argv[2])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
