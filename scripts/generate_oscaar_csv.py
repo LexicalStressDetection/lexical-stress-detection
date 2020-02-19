@@ -49,7 +49,6 @@ def main(oscaar_root, out_file):
         for f in transcript_iter:
             transcript_file = str(f)
             transcript_name = transcript_file.split(".")[0].split("/")[-1]
-            print(transcript_name)
             transcript_sub_name = ""
             if '_' in transcript_name:
                 transcript_sub_name = transcript_name.split("_")[0]
