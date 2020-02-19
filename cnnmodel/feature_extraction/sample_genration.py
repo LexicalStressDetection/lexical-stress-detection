@@ -45,6 +45,7 @@ class SampleExtraction:
 
         if phoneme not in features_cache:
             samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
+            signal = signal.astype(np.int32)
             optimal_signal_len = int(samplerate * OPTIMAL_DURATION)
 
             signal_len = len(signal)
@@ -95,7 +96,7 @@ class SampleExtraction:
         current_word = None
         curr_vowels = []
         for line in phoneme_alignment_file:
-            path, id_, word, phoneme = line.split()
+            path, id_, word, phoneme = line[:-1].split('\t')
             phoneme = Phoneme(path, id_, word, phoneme)
             if not current_word:
                 current_word = (id_, word)
