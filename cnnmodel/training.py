@@ -79,6 +79,7 @@ def main(train_path, test_path, model_path):
 
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
+    torch.cuda.current_device()
     print('using device', device)
 
     import multiprocessing
@@ -88,10 +89,10 @@ def main(train_path, test_path, model_path):
               'pin_memory': True} if use_cuda else {}
 
     train_dataset = CNNDataset(root=train_path)
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, **kwargs)
 
     test_dataset = CNNDataset(root=test_path)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True, **kwargs)
+    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=True, **kwargs)
 
     model = CNNStressNet(reduction='mean').to(device)
     model = restore_model(model, model_path)
