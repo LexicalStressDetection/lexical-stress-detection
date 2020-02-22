@@ -18,6 +18,11 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
     model.train()
     losses = []
     accuracy = 0
+    true_pos = 0
+    true_neg = 0
+    false_pos = 0
+    false_neg = 0
+    metric_to_count = {}
     for batch_idx, ((mfcc, non_mfcc), label) in enumerate(tqdm.tqdm(train_loader)):
         mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
         optimizer.zero_grad()
@@ -27,6 +32,14 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
         with torch.no_grad():
             pred = torch.argmax(out, dim=1)
             accuracy += torch.sum((pred == label))
+            if label == pred == 1:
+                true_pos += 1
+            if pred == 1 and label != pred:
+                false_pos += 1
+            if label == pred == 0:
+                true_neg += 1
+            if pred == 0 and label != pred:
+                false_neg += 1
 
         losses.append(loss.item())
         loss.backward()
@@ -39,8 +52,12 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
                 100. * batch_idx / len(train_loader), loss.item()))
 
     accuracy_mean = (100. * accuracy) / len(train_loader.dataset)
+    metric_to_count["TP"] = true_pos
+    metric_to_count["FP"] = false_pos
+    metric_to_count["TN"] = true_neg
+    metric_to_count["FN"] = false_neg
 
-    return np.mean(losses), accuracy_mean
+    return np.mean(losses), accuracy_mean, metric_to_count
 
 
 def test(model, device, test_loader, log_interval=None):
@@ -48,6 +65,11 @@ def test(model, device, test_loader, log_interval=None):
     losses = []
 
     accuracy = 0
+    true_pos = 0
+    true_neg = 0
+    false_pos = 0
+    false_neg = 0
+    metric_to_count = {}
     with torch.no_grad():
         for batch_idx, ((mfcc, non_mfcc), label) in enumerate(tqdm.tqdm(test_loader)):
             mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
@@ -57,6 +79,14 @@ def test(model, device, test_loader, log_interval=None):
 
             pred = torch.argmax(out, dim=1)
             accuracy += torch.sum((pred == label))
+            if label == pred == 1:
+                true_pos += 1
+            if pred == 1 and label != pred:
+                false_pos += 1
+            if label == pred == 0:
+                true_neg += 1
+            if pred == 0 and label != pred:
+                false_neg += 1
 
             if log_interval is not None and batch_idx % log_interval == 0:
                 print('{} Test: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -66,10 +96,14 @@ def test(model, device, test_loader, log_interval=None):
 
     test_loss = np.mean(losses)
     accuracy_mean = (100. * accuracy) / len(test_loader.dataset)
+    metric_to_count["TP"] = true_pos
+    metric_to_count["FP"] = false_pos
+    metric_to_count["TN"] = true_neg
+    metric_to_count["FN"] = false_neg
 
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} , ({:.4f})%\n'.format(
         test_loss, accuracy, len(test_loader.dataset), accuracy_mean))
-    return test_loss, accuracy_mean
+    return test_loss, accuracy_mean, metric_to_count
 
 
 def main(train_path, test_path, model_path):
@@ -96,28 +130,36 @@ def main(train_path, test_path, model_path):
 
     model = CNNStressNet(reduction='mean').to(device)
     model = restore_model(model, model_path)
-    last_epoch, max_accuracy, train_losses, test_losses, train_accuracies, test_accuracies = \
-        restore_objects(model_path, (0, 0, [], [], [], []))
+    last_epoch, max_accuracy, train_losses, test_losses, train_accuracies, test_accuracies, train_metric_counts_list, \
+    test_metric_counts_list = restore_objects(model_path, (0, 0, [], [], [], [], [], []))
 
     start = last_epoch + 1 if max_accuracy > 0 else 0
 
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     for epoch in range(start, 5):
-        train_loss, train_accuracy = train(model, device, train_loader, optimizer, epoch, 100)
-        test_loss, test_accuracy = test(model, device, test_loader)
+        train_loss, train_accuracy, train_metric_counts = train(model, device, train_loader, optimizer, epoch, 100)
+        test_loss, test_accuracy, test_metric_counts = test(model, device, test_loader)
+        test_precision = (test_metric_counts["TP"]) / (test_metric_counts["TP"] + test_metric_counts["FP"])
+        test_recall = (test_metric_counts["TP"]) / (test_metric_counts["TP"] + test_metric_counts["FN"])
+        test_f1_score = (2.0 * test_precision * test_recall) / (test_precision + test_recall)
         print('After epoch: {}, train_loss: {}, test loss is: {}, train_accuracy: {}, '
-              'test_accuracy: {}'.format(epoch, train_loss, test_loss, train_accuracy, test_accuracy))
+              'test_accuracy: {}, test_precision: {}, test_recall: {}, test_f1_score: {}'.format(epoch, train_loss,
+                                                                              test_loss, train_accuracy,
+                                                                              test_accuracy, test_precision,
+                                                                              test_recall, test_f1_score))
 
         train_losses.append(train_loss)
         test_losses.append(test_loss)
         train_accuracies.append(train_accuracy)
         test_accuracies.append(test_accuracy)
+        train_metric_counts_list.append(train_metric_counts)
+        test_metric_counts_list.append(test_metric_counts)
         if test_accuracy > max_accuracy:
             max_accuracy = test_accuracy
             save_model(model, epoch, model_path)
-            save_objects((epoch, max_accuracy, train_losses, test_losses, train_accuracies, test_accuracies),
-                         epoch, model_path)
+            save_objects((epoch, max_accuracy, train_losses, test_losses, train_accuracies, test_accuracies,
+                          train_metric_counts_list, test_metric_counts_list), epoch, model_path)
             print('saved epoch: {} as checkpoint'.format(epoch))
 
 
