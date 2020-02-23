@@ -8,6 +8,7 @@ class CNNDataset(Dataset):
     def __init__(self, root):
         self.dataset_folder = DatasetFolder(root=root, loader=CNNDataset._npy_loader, extensions=('_mfcc.npy',))
         self.len_ = len(self.dataset_folder)
+        self.folder_to_index = self.dataset_folder.class_to_idx
 
     @staticmethod
     def _npy_loader(path):
