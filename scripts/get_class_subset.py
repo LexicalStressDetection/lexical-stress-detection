@@ -26,7 +26,6 @@ def main(data_root):
 
 
 if __name__ == "__main__":
-    # needs two command line argument.
-    # 1. root path of Oscaar
-    # 2. output csv path
+    # needs one command line argument.
+    # 1. root path of data
     main(sys.argv[1])
