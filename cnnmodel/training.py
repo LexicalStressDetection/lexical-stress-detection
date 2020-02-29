@@ -55,6 +55,7 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
     accuracy_mean = (100. * metric_dict['accuracy']) / len(train_loader.dataset)
 
     metric_dict['batch_losses'] = losses
+    metric_dict['accuracy_mean'] = accuracy_mean
     metric_dict['precision'] = (metric_dict["true_pos"]) / (metric_dict["true_pos"] + metric_dict["false_pos"])
     metric_dict['recall'] = (metric_dict["true_pos"]) / (metric_dict["true_pos"] + metric_dict["false_neg"])
     metric_dict['f1_score'] = (2.0 * metric_dict['precision'] * metric_dict['recall']) / \
@@ -95,12 +96,13 @@ def test(model, device, test_loader, log_interval=None):
     accuracy_mean = (100. * metric_dict['accuracy']) / len(test_loader.dataset)
 
     metric_dict['batch_losses'] = losses
+    metric_dict['accuracy_mean'] = accuracy_mean
     metric_dict['precision'] = (metric_dict["true_pos"]) / (metric_dict["true_pos"] + metric_dict["false_pos"])
     metric_dict['recall'] = (metric_dict["true_pos"]) / (metric_dict["true_pos"] + metric_dict["false_neg"])
     metric_dict['f1_score'] = (2.0 * metric_dict['precision'] * metric_dict['recall']) / \
                               (metric_dict['precision'] + metric_dict['recall'])
 
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} , ({:.4f})%\n'.format(
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{}, ({:.4f})%\n'.format(
         test_loss, metric_dict['accuracy'], len(test_loader.dataset), accuracy_mean))
     return test_loss, accuracy_mean, metric_dict
 
@@ -138,18 +140,12 @@ def main(train_path, test_path, model_path):
 
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
-    for epoch in range(start, 5):
+    for epoch in range(start, start + 5):
         train_loss, train_accuracy, train_metrics = train(model, device, train_loader, optimizer, epoch, 100)
         test_loss, test_accuracy, test_metrics = test(model, device, test_loader)
 
-        train_metrics_copy = {k: v for k, v in train_metrics.items()}
-        test_metrics_copy = {k: v for k, v in test_metrics.items()}
-
-        del train_metrics_copy['batch_losses']
-        del test_metrics_copy['batch_losses']
-
-        print('After epoch: {}, train_loss: {}, test loss is: {}, train_metrics: {}, test_metrics: {}'.format(
-            epoch, train_loss, test_loss, train_metrics_copy, test_metrics_copy))
+        print('After epoch: {}, train_loss: {}, test loss is: {}, train_accuracy: {}, test_accuracy: {}'.format(
+            epoch, train_loss, test_loss, train_accuracy, test_accuracy))
 
         train_losses.append(train_loss)
         test_losses.append(test_loss)
