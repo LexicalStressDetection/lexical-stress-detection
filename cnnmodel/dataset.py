@@ -23,9 +23,10 @@ class CNNDataset(Dataset):
         mfcc = torch.from_numpy(mfcc).float()
         non_mfcc = torch.from_numpy(non_mfcc).float()
 
-        return mfcc, non_mfcc
+        return mfcc, non_mfcc, path
 
     def __getitem__(self, index):
+
         return self.dataset_folder[index]
 
     def __len__(self):

@@ -1,7 +1,7 @@
 import sys
 import time
 import tqdm
-
+import csv
 import numpy as np
 import torch
 
@@ -13,6 +13,9 @@ from cnnmodel.dataset import CNNDataset
 
 from util.pt_util import restore_objects, save_model, save_objects, restore_model
 
+data_check_test = open('data_check_test.csv','w')
+
+writer = csv.writer(data_check_test, delimiter=',', lineterminator='\n')
 
 def update_metrics(pred: torch.Tensor, label: torch.Tensor, metric_dict: dict):
     metric_dict['accuracy'] += torch.sum((pred == label)).item()
@@ -33,10 +36,11 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
         'false_neg': 0
     }
 
-    for batch_idx, ((mfcc, non_mfcc), label) in enumerate(tqdm.tqdm(train_loader)):
+    for batch_idx, ((mfcc, non_mfcc, path), label) in enumerate(tqdm.tqdm(train_loader)):
         mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
         optimizer.zero_grad()
         out = model(mfcc, non_mfcc)
+        prob = torch.nn.functional.softmax(out, dim=1)
         loss = model.loss(out, label)
         with torch.no_grad():
             pred = torch.argmax(out, dim=1)
@@ -77,9 +81,10 @@ def test(model, device, test_loader, log_interval=None):
     }
 
     with torch.no_grad():
-        for batch_idx, ((mfcc, non_mfcc), label) in enumerate(tqdm.tqdm(test_loader)):
+        for batch_idx, ((mfcc, non_mfcc, path), label) in enumerate(tqdm.tqdm(test_loader)):
             mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
             out = model(mfcc, non_mfcc)
+            prob = torch.nn.functional.softmax(out,dim=1)
             test_loss_on = model.loss(out, label).item()
             losses.append(test_loss_on)
 
@@ -104,6 +109,9 @@ def test(model, device, test_loader, log_interval=None):
 
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{}, ({:.4f})%\n'.format(
         test_loss, metric_dict['accuracy'], len(test_loader.dataset), accuracy_mean))
+
+    writer.writerow((path, prob, label, pred))
+
     return test_loss, accuracy_mean, metric_dict
 
 
@@ -143,7 +151,6 @@ def main(train_path, test_path, model_path):
     for epoch in range(start, start + 5):
         train_loss, train_accuracy, train_metrics = train(model, device, train_loader, optimizer, epoch, 100)
         test_loss, test_accuracy, test_metrics = test(model, device, test_loader)
-
         print('After epoch: {}, train_loss: {}, test loss is: {}, train_accuracy: {}, test_accuracy: {}'.format(
             epoch, train_loss, test_loss, train_accuracy, test_accuracy))
 
