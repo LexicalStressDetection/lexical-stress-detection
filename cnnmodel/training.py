@@ -16,6 +16,7 @@ from util.pt_util import restore_objects, save_model, save_objects, restore_mode
 data_check_test = open('data_check_test.csv','w')
 writer = csv.writer(data_check_test, delimiter=',', lineterminator='\n')
 
+
 def update_metrics(pred: torch.Tensor, label: torch.Tensor, metric_dict: dict):
     metric_dict['accuracy'] += torch.sum((pred == label)).item()
     metric_dict['true_pos'] += torch.sum((label == 1) & (pred == 1)).item()
@@ -110,8 +111,6 @@ def test(model, device, test_loader, log_interval=None):
 
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{}, ({:.4f})%\n'.format(
         test_loss, metric_dict['accuracy'], len(test_loader.dataset), accuracy_mean))
-
-
 
     return test_loss, accuracy_mean, metric_dict
 
