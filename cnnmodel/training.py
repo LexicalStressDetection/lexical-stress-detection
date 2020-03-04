@@ -14,7 +14,6 @@ from cnnmodel.dataset import CNNDataset
 from util.pt_util import restore_objects, save_model, save_objects, restore_model
 
 data_check_test = open('data_check_test.csv','w')
-
 writer = csv.writer(data_check_test, delimiter=',', lineterminator='\n')
 
 def update_metrics(pred: torch.Tensor, label: torch.Tensor, metric_dict: dict):
@@ -97,6 +96,8 @@ def test(model, device, test_loader, log_interval=None):
                     batch_idx * len(mfcc), len(test_loader.dataset),
                     100. * batch_idx / len(test_loader), test_loss_on))
 
+            writer.writerow((path, prob, label, pred))
+
     test_loss = np.mean(losses)
     accuracy_mean = (100. * metric_dict['accuracy']) / len(test_loader.dataset)
 
@@ -110,7 +111,7 @@ def test(model, device, test_loader, log_interval=None):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{}, ({:.4f})%\n'.format(
         test_loss, metric_dict['accuracy'], len(test_loader.dataset), accuracy_mean))
 
-    writer.writerow((path, prob, label, pred))
+
 
     return test_loss, accuracy_mean, metric_dict
 
