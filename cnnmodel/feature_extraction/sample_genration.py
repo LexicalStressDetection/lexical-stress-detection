@@ -54,13 +54,15 @@ class SampleExtraction:
             right_pad = abs(excess) - left_pad
 
             if signal_len > optimal_signal_len:
-                signal = signal[left_pad:-right_pad]
+                signal_mfcc = signal[left_pad:-right_pad]
 
             elif signal_len < optimal_signal_len:
-                signal = np.concatenate([np.zeros(left_pad), signal, np.zeros(right_pad)], axis=0)
+                signal_mfcc = np.concatenate([np.zeros(left_pad), signal, np.zeros(right_pad)], axis=0)
+            else:
+                signal_mfcc = signal
 
             # extract MFCC features, should be a matrix of shape (1, 10, 27)
-            mfcc_features = mfcc_extraction.get_mfcc(signal, samplerate, cep_num=27)
+            mfcc_features = mfcc_extraction.get_mfcc(signal_mfcc, samplerate, cep_num=27)
             # returned np array is of shape (10, 27), add a new channel axis
             mfcc_features = mfcc_features[np.newaxis, :, :]
 
