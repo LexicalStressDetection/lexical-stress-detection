@@ -1,13 +1,12 @@
-import uuid
 import sys
 import os
 import numpy as np
-import scipy.io.wavfile as sciwav
+import librosa
 import multiprocessing as mp
 
 
 from util import LRU
-from cnnmodel.feature_extraction import mfcc_extraction
+from cnnmodel.feature_extraction import mfcc_extraction_librosa
 from cnnmodel.feature_extraction import non_mfcc_extraction
 
 OPTIMAL_DURATION = 0.115  # we use a frame width of .025 s with stride of .010 s. duration = 0.115 will have 10 frames
@@ -39,13 +38,12 @@ class SampleExtraction:
     def get_phoneme_features(self, index, n, vowel_phonemes, features_cache):
         # if out of bound then
         if index < 0 or index >= n:
-            return np.zeros(shape=(1, 10, 27), dtype=np.float64), np.zeros(6, dtype=np.float64)
+            return np.zeros(shape=(1, 13, 30), dtype=np.float32), np.zeros(6, dtype=np.float32)
 
         phoneme = vowel_phonemes[index]
 
         if phoneme not in features_cache:
-            samplerate, signal = sciwav.read(self.wav_root + '/' + phoneme.path)
-            signal = signal.astype(np.int32)
+            signal, samplerate = librosa.load(self.wav_root + '/' + phoneme.path, sr=None)
             optimal_signal_len = int(samplerate * OPTIMAL_DURATION)
 
             signal_len = len(signal)
@@ -61,9 +59,9 @@ class SampleExtraction:
             else:
                 signal_mfcc = signal
 
-            # extract MFCC features, should be a matrix of shape (1, 10, 27)
-            mfcc_features = mfcc_extraction.get_mfcc(signal_mfcc, samplerate, cep_num=27)
-            # returned np array is of shape (10, 27), add a new channel axis
+            # extract MFCC features, should be a matrix of shape (1, 13, 30)
+            mfcc_features = mfcc_extraction_librosa.get_mfcc(signal_mfcc, samplerate)
+            # returned np array is of shape (13, 30), add a new channel axis
             mfcc_features = mfcc_features[np.newaxis, :, :]
 
             # extract non MFCC features, should be a vector of shape (6,)
