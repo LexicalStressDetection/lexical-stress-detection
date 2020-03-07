@@ -31,12 +31,12 @@ class CNNStressNet(nn.Module):
         super().__init__()
         self.loss_layer = nn.CrossEntropyLoss(reduction=reduction)
         self.cnn_network = nn.Sequential(
-            nn.BatchNorm2d(num_features=3),
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=(3 - 1)//2, stride=1),
             nn.ReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=(3 - 1)//2, stride=2),
             ResBlock(in_channels=32, out_channels=32, kernel_size=3),
-            nn.MaxPool2d(kernel_size=3, padding=(3 - 1) // 2, stride=2),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=(3 - 1) // 2, stride=2),
+            nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=(0, (3 - 1) // 2), stride=2),
             nn.BatchNorm2d(num_features=64),
             nn.ReLU(),
@@ -44,7 +44,6 @@ class CNNStressNet(nn.Module):
         )
 
         self.dnn_network = nn.Sequential(
-            nn.BatchNorm1d(num_features=18),
             nn.Linear(18, 64),
             nn.ReLU(),
             nn.Linear(64, 128),
@@ -57,6 +56,7 @@ class CNNStressNet(nn.Module):
             nn.Linear(128, 256),
             nn.ReLU(),
             nn.Linear(256, 512),
+            nn.Dropout(p=0.25),
             nn.ReLU(),
             nn.BatchNorm1d(num_features=512),
             nn.Linear(512, 256),
