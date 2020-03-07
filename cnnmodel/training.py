@@ -132,10 +132,10 @@ def main(train_path, test_path, model_path):
               'pin_memory': True} if use_cuda else {}
 
     train_dataset = CNNDataset(root=train_path)
-    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, **kwargs)
+    train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True, **kwargs)
 
     test_dataset = CNNDataset(root=test_path)
-    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=True, **kwargs)
+    test_loader = DataLoader(test_dataset, batch_size=512, shuffle=True, **kwargs)
 
     print('Folder to Index: {}'.format(train_dataset.folder_to_index))
 
@@ -146,10 +146,13 @@ def main(train_path, test_path, model_path):
 
     start = last_epoch + 1 if max_accuracy > 0 else 0
 
-    optimizer = optim.Adam(model.parameters(), lr=0.005)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+    test_loss, test_accuracy, test_metrics = test(model, device, test_loader)
+    print('Before any training:, test loss is: {}, test_accuracy: {}'.format(test_loss, test_accuracy))
 
     for epoch in range(start, start + 5):
-        train_loss, train_accuracy, train_metrics = train(model, device, train_loader, optimizer, epoch, 100)
+        train_loss, train_accuracy, train_metrics = train(model, device, train_loader, optimizer, epoch, 250)
         test_loss, test_accuracy, test_metrics = test(model, device, test_loader)
         print('After epoch: {}, train_loss: {}, test loss is: {}, train_accuracy: {}, test_accuracy: {}'.format(
             epoch, train_loss, test_loss, train_accuracy, test_accuracy))

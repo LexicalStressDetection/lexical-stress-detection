@@ -33,37 +33,49 @@ class CNNStressNet(nn.Module):
         self.cnn_network = nn.Sequential(
             nn.BatchNorm2d(num_features=3),
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=(3 - 1)//2, stride=1),
-            ResBlock(in_channels=16, out_channels=16, kernel_size=3),
+            nn.ReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=(3 - 1)//2, stride=2),
             ResBlock(in_channels=32, out_channels=32, kernel_size=3),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=(3 - 1) // 2, stride=2),
-            ResBlock(in_channels=64, out_channels=64, kernel_size=3),
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=(0, (3 - 1) // 2), stride=2),
-            nn.BatchNorm2d(num_features=128),
-            nn.PReLU(),
+            nn.MaxPool2d(kernel_size=3, padding=(3 - 1) // 2, stride=2),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=(0, (3 - 1) // 2), stride=2),
+            nn.BatchNorm2d(num_features=64),
+            nn.ReLU(),
             nn.AvgPool2d(kernel_size=(1, 4))
         )
 
         self.dnn_network = nn.Sequential(
             nn.BatchNorm1d(num_features=18),
-            nn.Linear(18, 256),
-            nn.PReLU(),
-            nn.Linear(256, 128),
-            nn.PReLU(),
+            nn.Linear(18, 64),
+            nn.ReLU(),
+            nn.Linear(64, 128),
+            nn.ReLU(),
             nn.Linear(128, 64)
         )
 
-        self.linear = nn.Linear(192, 2)
+        self.fully_connected = nn.Sequential(
+            nn.BatchNorm1d(num_features=128),
+            nn.Linear(128, 256),
+            nn.ReLU(),
+            nn.Linear(256, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(num_features=512),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(num_features=128),
+            nn.ReLU(),
+            nn.Linear(128, 2)
+        )
 
     def forward(self, mfcc, non_mfcc):
         n = mfcc.shape[0]
         cnn_out = self.cnn_network(mfcc)
-        cnn_out = cnn_out.reshape(n, 128)
+        cnn_out = cnn_out.reshape(n, 64)
 
         dnn_out = self.dnn_network(non_mfcc)
 
         out = torch.cat([cnn_out, dnn_out], dim=1)
-        out = self.linear(out)
+        out = self.fully_connected(out)
 
         return out
 
