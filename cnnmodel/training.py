@@ -1,8 +1,8 @@
 import sys
 import time
 import tqdm
-import csv
 import numpy as np
+import pandas as pd
 import torch
 
 from torch import optim
@@ -12,9 +12,6 @@ from cnnmodel.model import CNNStressNet
 from cnnmodel.dataset import CNNDataset
 
 from util.pt_util import restore_objects, save_model, save_objects, restore_model
-
-data_check_test = open('data_check_test.csv','w')
-writer = csv.writer(data_check_test, delimiter=',', lineterminator='\n')
 
 
 def update_metrics(pred: torch.Tensor, label: torch.Tensor, metric_dict: dict):
@@ -40,10 +37,10 @@ def train(model, device, train_loader, optimizer, epoch, log_interval):
         mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
         optimizer.zero_grad()
         out = model(mfcc, non_mfcc)
-        prob = torch.nn.functional.softmax(out, dim=1)
         loss = model.loss(out, label)
         with torch.no_grad():
-            pred = torch.argmax(out, dim=1)
+            prob = torch.nn.functional.softmax(out, dim=1)
+            pred = torch.argmax(prob, dim=1)
             update_metrics(pred=pred, label=label, metric_dict=metric_dict)
 
         losses.append(loss.item())
@@ -80,15 +77,17 @@ def test(model, device, test_loader, log_interval=None):
         'false_neg': 0
     }
 
+    data_check_dict = {'path': [], 'label': [], 'pred': [], 'prob_0': [], 'prob_1': []}
+
     with torch.no_grad():
         for batch_idx, ((mfcc, non_mfcc, path), label) in enumerate(tqdm.tqdm(test_loader)):
             mfcc, non_mfcc, label = mfcc.to(device), non_mfcc.to(device), label.to(device)
             out = model(mfcc, non_mfcc)
-            prob = torch.nn.functional.softmax(out,dim=1)
+            prob = torch.nn.functional.softmax(out, dim=1)
             test_loss_on = model.loss(out, label).item()
             losses.append(test_loss_on)
 
-            pred = torch.argmax(out, dim=1)
+            pred = torch.argmax(prob, dim=1)
             update_metrics(pred=pred, label=label, metric_dict=metric_dict)
 
             if log_interval is not None and batch_idx % log_interval == 0:
@@ -97,7 +96,14 @@ def test(model, device, test_loader, log_interval=None):
                     batch_idx * len(mfcc), len(test_loader.dataset),
                     100. * batch_idx / len(test_loader), test_loss_on))
 
-            writer.writerow((path, prob, label, pred))
+            data_check_dict['path'] += path
+            data_check_dict['label'] += label.tolist()
+            data_check_dict['pred'] += pred.tolist()
+            data_check_dict['prob_0'] += prob[:, 0].tolist()
+            data_check_dict['prob_1'] += prob[:, 1].tolist()
+
+    data_check_df = pd.DataFrame(data_check_dict)
+    data_check_df.to_csv('data_check_test.csv', index=False)
 
     test_loss = np.mean(losses)
     accuracy_mean = (100. * metric_dict['accuracy']) / len(test_loader.dataset)
