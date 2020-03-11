@@ -1,6 +1,6 @@
 # Lexical Stress Detection - NN
 
-lexical-stress-detection is aa deep learning model that identifies if a vowel phoneme
+lexical-stress-detection is a deep learning model that identifies if a vowel phoneme
 in an isolated word is stressed or un-stressed.
 
 The poster gives a brief description of the overall process we followed
