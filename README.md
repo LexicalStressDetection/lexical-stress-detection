@@ -11,7 +11,7 @@ The poster gives a brief description of the overall process we followed
 
 ---
 *To retrain the model follow the steps below:*
-### Feature Extraction
+#### Feature Extraction
 ##### Phoneme Alignment
 The first step of feature extraction is forced phoneme alignment of audio files. Refer to the alignment
 [readme](alignment/README.md).
@@ -62,7 +62,7 @@ The script needs three input parameters as command line arguments.
 3. Test path
 4. Test percentage - a floating point number int the range (0,1). We used 0.15.
 
-### Model
+#### Model
 The [`model`](cnnmodel/model.py) is a combination of CNN and DNN. Spectral features are fed into the CNN and the
 non spectral into DNN. The output form these networks are concatenated and fed into another DNN and finally, the
 softmax loss layer is used.
