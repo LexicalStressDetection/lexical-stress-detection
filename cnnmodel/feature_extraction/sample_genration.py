@@ -6,7 +6,7 @@ import multiprocessing as mp
 
 
 from util import LRU
-from cnnmodel.feature_extraction import mfcc_extraction_librosa
+from cnnmodel.feature_extraction import mfcc_extraction
 from cnnmodel.feature_extraction import non_mfcc_extraction
 
 OPTIMAL_DURATION = 0.115  # we use a frame width of .025 s with stride of .010 s. duration = 0.115 will have 10 frames
@@ -60,7 +60,7 @@ class SampleExtraction:
                 signal_mfcc = signal
 
             # extract MFCC features, should be a matrix of shape (1, 13, 30)
-            mfcc_features = mfcc_extraction_librosa.get_mfcc(signal_mfcc, samplerate)
+            mfcc_features = mfcc_extraction.get_mfcc(signal_mfcc, samplerate)
             # returned np array is of shape (13, 30), add a new channel axis
             mfcc_features = mfcc_features[np.newaxis, :, :]
 
