@@ -7,7 +7,7 @@ in an isolated word is stressed or un-stressed.
 
 The poster gives a brief description of the overall process we followed
 
-[embed]https://github.com/LexicalStressDetection/lexical-stress-detection/blob/master/images/project_poster.pdf[/embed]
+![alt text](https://github.com/LexicalStressDetection/lexical-stress-detection/blob/master/images/project_poster.png)
 
 ---
 *To retrain the model follow the steps below:*
