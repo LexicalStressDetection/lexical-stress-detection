@@ -3,7 +3,7 @@
 lexical-stress-detection is a deep learning model that identifies if a vowel phoneme
 in an isolated word is stressed or un-stressed.
 
-The poster gives a brief description of the overall process we followed
+The image below summarizes the project
 
 ![alt text](https://github.com/LexicalStressDetection/lexical-stress-detection/blob/master/images/project_poster.png)
 
