@@ -4,19 +4,13 @@ Lexical stress detection using deep neural network.
 
 ml-stress-detection-nn is a neural network architecture that identifies if a vowel phoneme
 in an isolated word is stressed or un-stressed.
-This network provides 3 types of feedback to the user:
-
-1) GJ_GJ - if the user has stressed the correct vowel phoneme
-
-2) S_LOCATION - if the user has interchanged the stress between primary
-stressed and unstressed vowel phoneme
-
-3) NO_STRESS - if the user doesn't stress on any vowel phoneme
+The poster gives a brief description of the overall process
+[Project Poster](lexical-stress-detection/images/project_poster.pdf)
 
 ---
 *To retrain the model follow the steps below:*
-## Feature Extraction
-#### Phoneme Alignment
+### Feature Extraction
+##### Phoneme Alignment
 The first step of feature extraction is forced phoneme alignment of audio files. Refer to the alignment
 [readme](alignment/README.md).
 
@@ -24,7 +18,7 @@ Phoneme alignment needs the files in .wav format. If you've .flacc files, use
 [this script](scripts/convert_flac_to_wav.sh) to convert them to wav files.
 
 
-#### Training Sample Generation
+##### Training Sample Generation
 This process extracts spectral and non spectral features from the of each phoneme, stores them as numpy arrays and
 writes to disk as .npy files. 
 
@@ -49,16 +43,16 @@ unstressed, primary stress and secondary stress phoneme features.
  
 *Sample generation script is parallelized, CPU with 16 or more cores is recommended for running it.*
 
-#### Class Balancing
+##### Class Balancing
 After sample generation, primary stress phonemes were twice as much than unstressed. Secondary stress were a very 
 small percentage of the total. For this project we completely ignored secondary stress and randomly sampled primary 
 stress features approximately equal to unstressed.
 
-#### Stop Words Removal
+##### Stop Words Removal
 We removed features of [80 stop words](cnnmodel/feature_extraction/ignored_words.txt). Since the npy file names
 have the word in them, a sample script can be written for this action.
 
-#### Train Test Split
+##### Train Test Split
 Use [`train_test_split.py`](cnnmodel/feature_extraction/train_test_split.py) to split data into train and val sets.
 The script needs three input parameters as command line arguments.
 1. Root path of the folder where npy sample files are stored. 
@@ -66,12 +60,12 @@ The script needs three input parameters as command line arguments.
 3. Test path
 4. Test percentage - a floating point number int the range (0,1). We used 0.15.
 
-## Model
+### Model
 The [`model`](cnnmodel/model.py) is a combination of CNN and DNN. Spectral features are fed into the CNN and the
 non spectral into DNN. The output form these networks are concatenated and fed into another DNN and finally, the
 softmax loss layer is used.
 
-## Training
+##### Training
 The [`training.py`](cnnmodel/training.py) script takes five command line arguments:
 1. Root path of train data
 2. Root path of val data
