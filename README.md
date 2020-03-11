@@ -2,7 +2,7 @@
 
 Lexical stress detection using deep neural network.
 
-ml-stress-detection-nn is a neural network architecture that identifies if a vowel phoneme
+lexical-stress-detection is a neural network model model that identifies if a vowel phoneme
 in an isolated word is stressed or un-stressed.
 
 The poster gives a brief description of the overall process we followed
@@ -10,7 +10,7 @@ The poster gives a brief description of the overall process we followed
 ![alt text](https://github.com/LexicalStressDetection/lexical-stress-detection/blob/master/images/project_poster.png)
 
 ---
-*To retrain the model follow the steps below:*
+**To retrain the model follow the steps below:**
 #### Feature Extraction
 ##### Phoneme Alignment
 The first step of feature extraction is forced phoneme alignment of audio files. Refer to the alignment
