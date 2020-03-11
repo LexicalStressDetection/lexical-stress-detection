@@ -4,8 +4,10 @@ Lexical stress detection using deep neural network.
 
 ml-stress-detection-nn is a neural network architecture that identifies if a vowel phoneme
 in an isolated word is stressed or un-stressed.
-The poster gives a brief description of the overall process
-[Project Poster](lexical-stress-detection/images/project_poster.pdf)
+
+The poster gives a brief description of the overall process we followed
+
+[embed]https://github.com/LexicalStressDetection/lexical-stress-detection/blob/master/images/project_poster.pdf[/embed]
 
 ---
 *To retrain the model follow the steps below:*
