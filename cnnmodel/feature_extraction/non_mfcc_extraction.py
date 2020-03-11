@@ -1,9 +1,40 @@
 import numpy
-from cnnmodel.feature_extraction import mfcc_extraction
+import math
 
 EPS = 1e-8  # 0.00000001
 win_length = 0.025
 win_step = 0.01
+
+
+def audio2frame(signal, frame_length, frame_step, winfunc=lambda x: numpy.ones((x,))):
+    """
+    Frame a signal into overlapping frames.
+    :param signal: the audio signal to frame.
+    :param frame_length: length of each frame measured in samples.
+    :param frame_step: number of samples after the start of the previous frame that the next frame should begin.
+    :param winfunc: the analysis window to apply to each frame. By default no window is applied.
+    :returns: an array of frames. Size is NUMFRAMES by frame_len.
+    """
+    signal_length = len(signal)
+    frame_length = int(round(frame_length))
+    frame_step = int(round(frame_step))
+    if signal_length <= frame_length:
+        frames_num = 1
+    else:
+        frames_num = 1 + int(math.ceil((1.0 * signal_length - frame_length) / frame_step))
+
+    pad_length = int((frames_num - 1) * frame_step + frame_length)
+
+    zeros = numpy.zeros((pad_length - signal_length,))
+    pad_signal = numpy.concatenate((signal, zeros))
+
+    indices = numpy.tile(numpy.arange(0, frame_length), (frames_num, 1)) + numpy.tile(
+        numpy.arange(0, frames_num * frame_step, frame_step), (frame_length, 1)).T
+    indices = numpy.array(indices, dtype=numpy.int32)
+    frames = pad_signal[indices]
+    win = numpy.tile(winfunc(frame_length), (frames_num, 1))
+
+    return frames * win
 
 
 def get_p2pamplitude(signal):
@@ -143,7 +174,7 @@ def get_non_mfcc(signal, samplerate):
     """
 
     non_mfcc_features = numpy.zeros(6)
-    frames = mfcc_extraction.audio2frame(signal, win_length * samplerate, win_step * samplerate)
+    frames = audio2frame(signal, win_length * samplerate, win_step * samplerate)
     energy = get_energy_for_frames(frames)
     pitch_vals = get_pitch_values(frames, samplerate)
     non_mfcc_features[0] = get_p2pamplitude(signal)
