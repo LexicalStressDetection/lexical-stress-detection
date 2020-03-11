@@ -121,7 +121,7 @@ def test(model, device, test_loader, log_interval=None):
     return test_loss, accuracy_mean, metric_dict
 
 
-def main(train_path, test_path, model_path):
+def main(train_path, test_path, model_path, learning_rate, epochs):
     print('train path: {}'.format(train_path))
     print('test path: {}'.format(test_path))
     print('model path: {}'.format(model_path))
@@ -152,12 +152,12 @@ def main(train_path, test_path, model_path):
 
     start = last_epoch + 1 if max_accuracy > 0 else 0
 
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     test_loss, test_accuracy, test_metrics = test(model, device, test_loader)
     print('Before any training:, test loss is: {}, test_accuracy: {}'.format(test_loss, test_accuracy))
 
-    for epoch in range(start, start + 5):
+    for epoch in range(start, start + epochs):
         train_loss, train_accuracy, train_metrics = train(model, device, train_loader, optimizer, epoch, 250)
         test_loss, test_accuracy, test_metrics = test(model, device, test_loader)
         print('After epoch: {}, train_loss: {}, test loss is: {}, train_accuracy: {}, test_accuracy: {}'.format(
@@ -181,4 +181,6 @@ if __name__ == '__main__':
     # 1. root path of train data
     # 2. root path of test data
     # 3. path where saved models are saved
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    # 4. Learning rate
+    # 5. Number of epochs
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
